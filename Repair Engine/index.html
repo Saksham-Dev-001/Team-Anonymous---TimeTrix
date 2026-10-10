@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TimeTrix — Autonomous Timetable Repair System | by Team Anonymous</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="./css/tokens.css?v=25">
+  <link rel="stylesheet" href="./css/base.css?v=25">
+  <link rel="stylesheet" href="./css/layout.css?v=25">
+  <link rel="stylesheet" href="./css/components.css?v=25">
+  <link rel="stylesheet" href="./css/auth.css?v=25">
+  <link rel="stylesheet" href="./css/timetable.css?v=28">
+  <link rel="stylesheet" href="./css/repair.css?v=25">
+  <link rel="stylesheet" href="./css/themes.css?v=25">
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body.login-active {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background-color: #F8FAFC !important;
+    }
+    body.login-active .app-container {
+      display: block !important;
+      min-height: 100vh;
+      width: 100%;
+    }
+    body.login-active .app-main {
+      width: 100%;
+      min-height: 100vh;
+    }
+    body.login-active .app-sidebar,
+    body.login-active .app-topbar {
+      display: none !important;
+    }
+    body.login-active .app-content {
+      padding: 0 !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+    }
+  </style>
+</head>
+<body class="login-active">
+  <div class="app-container">
+    <!-- Cyber Sidebar Navigation (Only shown when logged in) -->
+    <aside class="app-sidebar" id="sidebar" style="display: none;">
+      <div class="sidebar-header">
+        <div class="brand-logo" id="app-logo-container"></div>
+        <div>
+          <div class="brand-title">TimeTrix</div>
+          <div style="font-size: 0.68rem; color: #0891B2; font-weight: 700; letter-spacing: 0.04em;">by Team Anonymous</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-navigation">
+        <div class="nav-section-title">CORE PLATFORM</div>
+
+        <a href="#/dashboard" class="nav-link active" id="nav-dashboard">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-dashboard"></span>
+          </div>
+          <span class="nav-title">Dashboard</span>
+        </a>
+
+        <a href="#/admin" class="nav-link" id="nav-admin">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-admin"></span>
+          </div>
+          <span class="nav-title">Faculty Management</span>
+        </a>
+
+        <a href="#/hod" class="nav-link" id="nav-hod">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-hod"></span>
+          </div>
+          <span class="nav-title">HOD Department</span>
+        </a>
+
+        <div class="nav-section-title">ACADEMIC &amp; AI REPAIR</div>
+
+        <a href="#/leaves" class="nav-link" id="nav-leaves">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-absence"></span>
+          </div>
+          <span class="nav-title">Faculty Absence</span>
+        </a>
+
+        <a href="#/repair" class="nav-link" id="nav-repair">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-repair"></span>
+          </div>
+          <span class="nav-title">Time Table Repair</span>
+          <span class="nav-micro-badge">AI</span>
+        </a>
+
+        <a href="#/timetable" class="nav-link" id="nav-timetable">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-timetable"></span>
+          </div>
+          <span class="nav-title">View Time Table</span>
+        </a>
+
+        <div class="nav-section-title" id="nav-sec-system">GOVERNANCE &amp; REPORTS</div>
+
+        <a href="#/substitutions" class="nav-link" id="nav-substitutions">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-inbox"></span>
+          </div>
+          <span class="nav-title">Reports</span>
+        </a>
+
+        <a href="#/settings" class="nav-link" id="nav-settings">
+          <div class="nav-icon-box">
+            <span class="nav-icon" id="icon-settings"></span>
+          </div>
+          <span class="nav-title">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logout-btn" class="btn btn-secondary btn-sm" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;" title="Sign Out">
+          <span id="icon-logout"></span>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-topbar" id="app-topbar" style="display: none;">
+        <div class="topbar-left">
+          <div class="topbar-institutional-header" style="display: flex; align-items: center; gap: 0.65rem;">
+            <div style="width: 34px; height: 34px; border-radius: 10px; background: #F1F5F9; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+              🏛️
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 0.865rem; font-weight: 800; color: #1E293B; letter-spacing: -0.01em; line-height: 1.2;">Sri Balaji College of Engineering &amp; Technology</span>
+              <span style="font-size: 0.7rem; font-weight: 600; color: #0891B2; line-height: 1.2;">TimeTrix Autonomous Timetable Engine • Live</span>
+            </div>
+          </div>
+          <select id="role-switcher-select" style="display: none;"></select>
+        </div>
+        <div class="topbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+          <button id="quick-absence-topbar" class="btn btn-danger btn-sm" style="border-radius: 9999px; height: 38px; padding: 0 1.15rem; font-size: 0.815rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.45rem;">
+            <span id="icon-quick-absence"></span> Report Absence
+          </button>
+          <button id="push-notify-btn" class="btn btn-secondary btn-sm" style="border-radius: 9999px; height: 38px; padding: 0 1rem; font-size: 0.815rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; position: relative; overflow: visible !important; background: #FFFFFF; border: 1.5px solid #E2E8F0; color: #334155;">
+            <span id="icon-bell"></span> Notifications
+            <span id="notif-count-badge" style="display: none; position: absolute; top: -5px; right: -4px; background: #EF4444; color: #FFFFFF; font-size: 0.65rem; font-weight: 800; border-radius: 9999px; min-width: 18px; height: 18px; padding: 0 5px; border: 2px solid #FFFFFF; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4); line-height: 1; z-index: 10; pointer-events: none; align-items: center; justify-content: center;">0</span>
+          </button>
+          <div id="gmail-profile-trigger" style="display: flex; align-items: center; gap: 0.65rem; background: #FFFFFF; border: 1.5px solid #E2E8F0; padding: 3px 0.85rem 3px 4px; height: 38px; border-radius: 9999px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);" title="Click to Switch User / View Profile">
+            <div id="profile-avatar-pill" style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #0891B2, #8B5CF6); color: #FFFFFF; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(8, 145, 178, 0.3);">K</div>
+            <div style="display: flex; flex-direction: column; text-align: left;">
+              <span id="profile-name-pill" style="font-size: 0.815rem; font-weight: 700; color: #1E293B; line-height: 1.15; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Dr. K. S. Mukherjee</span>
+              <span id="profile-role-pill" style="font-size: 0.68rem; color: #0891B2; font-weight: 700; letter-spacing: 0.02em;">SUPER ADMIN</span>
+            </div>
+            <span style="font-size: 0.75rem; color: #94A3B8; margin-left: 0.1rem;">▾</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="app-content" id="main-content">
+        <!-- Dynamic Page Components Render Here -->
+      </section>
+    </main>
+  </div>
+
+  <!-- Boot Application -->
+  <script type="module">
+    import { auth } from './js/core/auth.js';
+    import { api } from './js/core/api.js';
+    import { router } from './js/core/router.js';
+    import { icons } from './js/ui/icons.js';
+    import { MOCK_DATABASE } from './js/core/mock-data.js';
+    import { pageAuth } from './js/pages/page-auth.js';
+    import { pageDashboard } from './js/pages/page-dashboard.js';
+    import { pageAdmin } from './js/pages/page-admin.js';
+    import { pageHOD } from './js/pages/page-hod.js';
+    import { pageTimetable } from './js/pages/page-timetable.js';
+    import { pageRepair } from './js/pages/page-repair.js';
+    import { pageLeaves } from './js/pages/page-leaves.js';
+    import { pageSubstitutions } from './js/pages/page-substitutions.js';
+    import { pageSettings } from './js/pages/page-settings.js';
+    import { openModal, closeModal } from './js/ui/modal.js';
+    import { showToast } from './js/ui/toast.js';
+    import { init3DTilt } from './js/ui/tilt-3d.js';
+    import { 
+      initSystemNotifications, 
+      checkAndShowReplacementModal, 
+      showFullscreenReplacementPopup,
+      triggerTestNotification,
+      requestNotificationPermission 
+    } from './js/ui/system-notifications.js';
+
+    // Inject SVG Icons
+    document.getElementById('app-logo-container').innerHTML = icons.logo;
+    document.getElementById('icon-dashboard').innerHTML = icons.dashboard;
+    document.getElementById('icon-admin').innerHTML = icons.admin;
+    document.getElementById('icon-hod').innerHTML = icons.hod;
+    document.getElementById('icon-timetable').innerHTML = icons.timetable;
+    document.getElementById('icon-absence').innerHTML = icons.absence;
+    document.getElementById('icon-repair').innerHTML = icons.repair;
+    document.getElementById('icon-inbox').innerHTML = icons.inbox;
+    document.getElementById('icon-logout').innerHTML = icons.logout;
+    document.getElementById('icon-quick-absence').innerHTML = icons.absence;
+    document.getElementById('icon-bell').innerHTML = icons.bell;
+    if (document.getElementById('icon-settings')) {
+      document.getElementById('icon-settings').innerHTML = icons.settings;
+    }
+
+    // Register Routes with Strict Role Restrictions
+    router.register('/login', pageAuth);
+    router.register('/dashboard', pageDashboard);
+    router.register('/admin', pageAdmin, ['super_admin']);
+    router.register('/hod', pageHOD, ['super_admin', 'hod']);
+    router.register('/timetable', pageTimetable);
+    router.register('/repair', pageRepair, ['super_admin', 'hod']);
+    router.register('/leaves', pageLeaves, ['super_admin', 'hod', 'teacher']);
+    router.register('/substitutions', pageSubstitutions, ['super_admin', 'hod', 'teacher']);
+    router.register('/settings', pageSettings, ['super_admin']);
+
+    // Theme System: Default High-Contrast Light Mode
+    localStorage.removeItem('relief_theme');
+    document.documentElement.removeAttribute('data-theme');
+
+    async function init() {
+      await auth.init();
+
+      const roleSwitcher = document.getElementById('role-switcher-select');
+      const roleBadgeDisplay = document.getElementById('role-badge-display');
+      
+      const updateRoleUI = (user) => {
+        if (!user) return;
+        const roleLabel = user.role.toUpperCase().replace('_', ' ');
+        const idBadge = user.academicId || user.id;
+        if (roleBadgeDisplay) {
+          roleBadgeDisplay.innerHTML = `<span style="color: var(--secondary-accent, #8B5CF6); font-family: var(--font-mono); font-size: 0.7rem; margin-right: 0.4rem; padding: 2px 6px; background: rgba(139,92,246,0.12); border-radius: 4px; font-weight: 700;">${idBadge}</span><span>${roleLabel}</span>`;
+        }
+
+        // Topbar Profile Pill update
+        const avatarPill = document.getElementById('profile-avatar-pill');
+        const namePill = document.getElementById('profile-name-pill');
+        const rolePill = document.getElementById('profile-role-pill');
+        if (avatarPill) avatarPill.textContent = (user.fullName || 'U').charAt(0);
+        if (namePill) namePill.textContent = user.fullName;
+        if (rolePill) rolePill.textContent = (user.academicId ? `[${user.academicId}] ` : '') + roleLabel;
+
+        // Dynamic Role-based Sidebar Permissions
+        const navAdmin = document.getElementById('nav-admin');
+        const navHOD = document.getElementById('nav-hod');
+        const navRepair = document.getElementById('nav-repair');
+        const navLeaves = document.getElementById('nav-leaves');
+        const navSubs = document.getElementById('nav-substitutions');
+        const navSettings = document.getElementById('nav-settings');
+        const quickAbsence = document.getElementById('quick-absence-topbar');
+
+        // Settings is STRICTLY for Admin
+        if (navSettings) navSettings.style.display = user.role === 'super_admin' ? 'flex' : 'none';
+        if (navAdmin) navAdmin.style.display = user.role === 'super_admin' ? 'flex' : 'none';
+        if (navHOD) navHOD.style.display = (user.role === 'super_admin' || user.role === 'hod') ? 'flex' : 'none';
+        if (navRepair) navRepair.style.display = (user.role === 'super_admin' || user.role === 'hod') ? 'flex' : 'none';
+        if (navLeaves) navLeaves.style.display = 'flex';
+        if (navSubs) navSubs.style.display = 'flex';
+        if (quickAbsence) quickAbsence.style.display = 'inline-flex';
+      };
+
+      window.updateRoleUI = updateRoleUI;
+
+      window.addEventListener('role_changed', (e) => {
+        const user = e.detail;
+        if (user) {
+          roleSwitcher.value = user.id;
+          updateRoleUI(user);
+          checkAndShowReplacementModal(user);
+        }
+      });
+
+      MOCK_DATABASE.users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = `[${u.academicId || u.id}] ${u.fullName} — ${u.roleTitle}`;
+        roleSwitcher.appendChild(opt);
+      });
+
+      const current = auth.getCurrentUser();
+      if (current) {
+        roleSwitcher.value = current.id;
+        updateRoleUI(current);
+      }
+
+      // Gmail-style Curved Account Switcher Modal Popup
+      const trigger = document.getElementById('gmail-profile-trigger');
+      if (trigger) {
+        trigger.onclick = () => {
+          const user = auth.getCurrentUser() || {};
+          const isSuperAdmin = user.role === 'super_admin';
+
+          const modalContainer = document.createElement('div');
+          modalContainer.style.cssText = 'display: flex; flex-direction: column; gap: 1rem;';
+
+          // 1. Current Active Account Pill Banner
+          const currentHero = document.createElement('div');
+          currentHero.style.cssText = 'background: var(--bg-subtle); border: 1px solid var(--border-glass); border-radius: 24px; padding: 1.15rem; display: flex; align-items: center; gap: 1rem;';
+          const userInit = (user.fullName || 'U').charAt(0).toUpperCase();
+          const roleDisplay = user.roleTitle || (user.role ? user.role.toUpperCase().replace('_', ' ') : 'FACULTY');
+          currentHero.innerHTML = `
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #EC4899, #8B5CF6); color: #fff; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(236,72,153,0.3);">
+              ${userInit}
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.fullName || 'Academic User'}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">${user.academicId || user.id || 'N/A'} • ${roleDisplay}</div>
+              <div style="font-size: 0.75rem; color: var(--secondary-accent, #8B5CF6); font-family: var(--font-mono); margin-top: 2px;">college.edu/auth/session-active</div>
+            </div>
+          `;
+          modalContainer.appendChild(currentHero);
+
+          // 2. Persona Switch List (Gmail Curved Pill rows)
+          const listTitle = document.createElement('div');
+          listTitle.style.cssText = 'font-size: 0.785rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0.2rem 0 0 0.5rem;';
+          listTitle.textContent = 'Switch Campus Role / Persona';
+          modalContainer.appendChild(listTitle);
+
+          const accountsList = document.createElement('div');
+          accountsList.style.cssText = 'display: flex; flex-direction: column; gap: 0.45rem; max-height: 230px; overflow-y: auto; padding-right: 4px;';
+
+          MOCK_DATABASE.users.forEach(u => {
+            const isCurrent = u.id === user.id;
+            const item = document.createElement('div');
+            item.className = 'gmail-pill-item';
+            if (isCurrent) {
+              item.style.borderColor = 'var(--primary-accent)';
+              item.style.background = 'var(--bg-subtle)';
+            }
+            const uRole = u.roleTitle || (u.role ? u.role.toUpperCase().replace('_', ' ') : 'FACULTY');
+            item.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: ${isCurrent ? 'var(--primary-accent)' : '#64748B'}; color: #fff; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: center;">
+                  ${(u.fullName || 'U').charAt(0)}
+                </div>
+                <div>
+                  <div style="font-size: 0.875rem; font-weight: 700; color: var(--text-main);">${u.fullName}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">${u.academicId || u.id} • ${uRole}</div>
+                </div>
+              </div>
+              <div style="font-size: 0.75rem; color: ${isCurrent ? 'var(--color-approved)' : 'var(--text-muted)'}; font-weight: 700;">
+                ${isCurrent ? '● Active' : 'Switch ➔'}
+              </div>
+            `;
+            item.onclick = () => {
+              auth.switchUser(u.id);
+              closeModal();
+              const newUser = auth.getCurrentUser();
+              updateRoleUI(newUser);
+              router.handleRoute();
+              showToast(`Switched account to ${u.fullName}`, 'normal');
+              checkAndShowReplacementModal(newUser);
+            };
+            accountsList.appendChild(item);
+          });
+          modalContainer.appendChild(accountsList);
+
+          // 3. Gmail Pill Actions
+          const actionsBox = document.createElement('div');
+          actionsBox.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;';
+
+          if (isSuperAdmin) {
+            const settingsBtn = document.createElement('button');
+            settingsBtn.className = 'gmail-pill-btn';
+            settingsBtn.innerHTML = '⚙️ Institutional Settings (Admin Only)';
+            settingsBtn.onclick = () => {
+              closeModal();
+              router.navigate('/settings');
+            };
+            actionsBox.appendChild(settingsBtn);
+          }
+
+
+
+          const signOutBtn = document.createElement('button');
+          signOutBtn.className = 'gmail-pill-btn';
+          signOutBtn.style.color = 'var(--color-conflict)';
+          signOutBtn.innerHTML = '🚪 Sign Out of College Account';
+          signOutBtn.onclick = async () => {
+            closeModal();
+            await auth.logout();
+            router.navigate('/login');
+          };
+          actionsBox.appendChild(signOutBtn);
+
+          modalContainer.appendChild(actionsBox);
+
+          openModal('Google Account & Campus Role', modalContainer);
+        };
+      }
+
+      // Real Dynamic In-App Notifications
+      const notifyBtn = document.getElementById('push-notify-btn');
+      const notifBadge = document.getElementById('notif-count-badge');
+
+      const updateNotifBadge = async () => {
+        const u = auth.getCurrentUser();
+        if (!u || !notifBadge) return;
+        const count = await api.getUnreadNotificationCount(u.id);
+        if (count > 0) {
+          notifBadge.textContent = count > 9 ? '9+' : String(count);
+          notifBadge.style.display = 'inline-flex';
+        } else {
+          notifBadge.style.display = 'none';
+        }
+      };
+
+      window.addEventListener('timetrix:notification', () => updateNotifBadge());
+      updateNotifBadge();
+
+      if (notifyBtn) {
+        notifyBtn.onclick = async () => {
+          const user = auth.getCurrentUser();
+          const notifs = await api.getNotifications(user ? user.id : null);
+          const notifyContent = document.createElement('div');
+          notifyContent.className = 'notif-scroll-area';
+          notifyContent.style.cssText = 'display: flex; flex-direction: column; gap: 0.85rem; max-height: 65vh; overflow-y: auto; padding-right: 0.35rem; padding-left: 0.1rem;';
+
+          // Rich Header Node with live badge count & subtitle
+          const modalHeaderNode = document.createElement('div');
+          modalHeaderNode.style.cssText = 'display: flex; align-items: center; gap: 0.85rem;';
+          modalHeaderNode.innerHTML = `
+            <div style="width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(6, 182, 212, 0.16)); border: 1.5px solid rgba(245, 158, 11, 0.28); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; box-shadow: 0 4px 12px -2px rgba(245, 158, 11, 0.15);">🔔</div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.55rem; line-height: 1.2;">
+                <span style="font-size: 1.15rem; font-weight: 800; color: #0F172A; letter-spacing: -0.015em;">Campus Notifications &amp; Alerts</span>
+                <span style="background: rgba(6, 182, 212, 0.12); color: #0284c7; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(6, 182, 212, 0.28);">${notifs.length} Total</span>
+              </div>
+              <div style="font-size: 0.75rem; color: #64748B; font-weight: 500; margin-top: 3px;">Autonomous AI timetable adjustments &amp; campus duty alerts</div>
+            </div>
+          `;
+
+          if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+            const permBanner = document.createElement('div');
+            permBanner.style.cssText = 'background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(99, 102, 241, 0.05)); border: 1.5px solid rgba(6, 182, 212, 0.35); border-radius: 18px; padding: 0.9rem 1.15rem; display: flex; align-items: center; justify-content: space-between; gap: 0.85rem; box-shadow: 0 4px 12px -2px rgba(6, 182, 212, 0.08); margin-bottom: 0.35rem;';
+            permBanner.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(6, 182, 212, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;">📲</div>
+                <div>
+                  <div style="font-size: 0.84rem; font-weight: 800; color: #0F172A;">Enable Push Notifications</div>
+                  <div style="font-size: 0.74rem; color: #64748B; font-weight: 500;">Get instant alerts on your device for timetable swaps &amp; leaves</div>
+                </div>
+              </div>
+              <button class="btn btn-cyan btn-sm" style="border-radius: 9999px; font-size: 0.75rem; font-weight: 800; padding: 0.4rem 0.95rem; flex-shrink: 0;">Enable</button>
+            `;
+            permBanner.querySelector('button').onclick = async () => {
+              const res = await requestNotificationPermission();
+              if (res === 'granted') {
+                showToast('✓ System Push Notifications Activated!', 'success');
+                permBanner.remove();
+                triggerTestNotification();
+              } else {
+                showToast('Notification permission was not granted by browser', 'warning');
+              }
+            };
+            notifyContent.appendChild(permBanner);
+          }
+
+          if (!notifs || notifs.length === 0) {
+            notifyContent.innerHTML += `
+              <div style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted); background: #F8FAFC; border-radius: 20px; border: 1.5px dashed #E2E8F0;">
+                <div style="font-size: 2.25rem; margin-bottom: 0.65rem;">🔔</div>
+                <h4 style="color: #0F172A; margin-bottom: 0.35rem; font-weight: 800; font-size: 1.05rem;">All Caught Up!</h4>
+                <p style="font-size: 0.825rem; color: #64748B; margin: 0;">No pending notices. Faculty absences and timetable repairs will broadcast here in real-time.</p>
+              </div>
+            `;
+          } else {
+            notifs.forEach(n => {
+              const item = document.createElement('div');
+              item.className = 'notif-card-item';
+
+              let badgeClass = 'badge-normal';
+              let badgeText = 'NOTICE';
+              let accentColor = '#0284c7';
+
+              if (n.type === 'substitution_assigned') {
+                badgeClass = 'badge-substitute';
+                badgeText = '⚡ SUB DUTY';
+                accentColor = '#7C3AED';
+              } else if (n.type === 'absence_logged') {
+                badgeClass = 'badge-affected';
+                badgeText = '📋 ABSENCE';
+                accentColor = '#F59E0B';
+              } else if (n.type === 'substitution_updated') {
+                badgeClass = 'badge-moved';
+                badgeText = '🔄 REASSIGNED';
+                accentColor = '#F59E0B';
+              } else if (n.type === 'system_alert') {
+                badgeClass = 'badge-approved';
+                badgeText = '🛡️ SYSTEM';
+                accentColor = '#059669';
+              } else if (n.type === 'leave_request') {
+                badgeClass = 'badge-substitute';
+                badgeText = '📝 LEAVE';
+                accentColor = '#7C3AED';
+              } else if (n.type === 'leave_approved') {
+                badgeClass = 'badge-approved';
+                badgeText = '✅ APPROVED';
+                accentColor = '#059669';
+              } else if (n.type === 'leave_rejected') {
+                badgeClass = 'badge-affected';
+                badgeText = '❌ REJECTED';
+                accentColor = '#DC2626';
+              }
+
+              let displayTitle = n.title || 'Campus Notification';
+              let rawBody = n.body || '';
+
+              if (displayTitle && typeof displayTitle === 'string') {
+                displayTitle = displayTitle.replace(/Timetable Updated:/gi, 'Schedule Updated:');
+                // Clean leading emoji if already shown in badge
+                displayTitle = displayTitle.replace(/^[⚡🛡️📋🔄📝✅❌\s]+/u, '').trim();
+              }
+
+              // Rich Text Formatter for Body
+              let richBody = rawBody;
+
+              if (rawBody.includes('actively monitoring')) {
+                richBody = `<strong style="color: #0F172A; font-weight: 800;">TimeTrix Autonomous Repair Engine</strong> is <span style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.78rem;">● Actively Monitoring</span> faculty attendance and schedule continuity in real-time.`;
+              } else {
+                // Format lecture counts cleanly without awkward (s)
+                richBody = richBody.replace(/(\d+)\s*(scheduled lecture\(s\)|\bscheduled lectures\b|\bscheduled lecture\b|\bbroken lecture slot\(s\)|\bbroken lecture slots\b|\bbroken lecture slot\b)/gi, (m, count) => {
+                  const c = parseInt(count, 10);
+                  const word = c === 1 ? '1 scheduled lecture' : `${c} scheduled lectures`;
+                  return `<strong style="color: #0F172A; font-weight: 800;">${word}</strong>`;
+                });
+
+                richBody = richBody
+                  .replace(/have been updated in the timetable\.\s*Substitute faculty & absent teacher notified\./gi, 'have been successfully covered with substitute faculty.')
+                  .replace(/have been successfully covered with substitute faculty\.\s*Schedule updated & clash-free verified\./gi, 'have been successfully covered with substitute faculty.');
+
+                // Highlight text dates like "10 Oct 2026"
+                richBody = richBody.replace(/\b(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4})\b/gi, '<strong style="color: #0F172A; font-weight: 700;">$1</strong>');
+
+                // Highlight ISO dates like "2026-10-10"
+                richBody = richBody.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (match) => {
+                  const d = new Date(match);
+                  const formatted = isNaN(d.getTime()) ? match : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                  return `<strong style="color: #0F172A; font-weight: 700;">${formatted}</strong>`;
+                });
+
+                // Highlight successful cover status
+                richBody = richBody.replace(/have been successfully covered with substitute faculty/gi, 'have been <span style="color: #059669; font-weight: 700; background: rgba(16, 185, 129, 0.1); padding: 1px 7px; border-radius: 6px;">✓ successfully covered</span> with substitute faculty');
+
+                // Highlight room codes
+                richBody = richBody.replace(/\b(in room|room)\s+([A-Za-z0-9\-]+)/gi, (match, prefix, room) => {
+                  return `${prefix} <span style="background: rgba(34, 211, 238, 0.12); color: #0891b2; font-weight: 700; padding: 1px 6px; border-radius: 6px; font-size: 0.78rem;">${room}</span>`;
+                });
+
+                // Highlight period
+                richBody = richBody.replace(/\b(Period\s+\d+)\b/gi, `<strong style="color: #0F172A; font-weight: 700;">$1</strong>`);
+
+                // Highlight match percentage
+                richBody = richBody.replace(/\((\d+%\s*Best Match)\)/gi, `<span style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 700; padding: 1px 6px; border-radius: 6px; font-size: 0.74rem;">★ $1</span>`);
+
+                // Highlight Syllabus Continuity
+                richBody = richBody.replace(/\(Syllabus Continuity\)/gi, `<span style="background: rgba(139, 92, 246, 0.1); color: #7c3aed; font-weight: 600; padding: 1px 6px; border-radius: 6px; font-size: 0.74rem;">📚 Syllabus Continuity</span>`);
+              }
+
+              let verificationPill = '';
+              if (rawBody.includes('actively monitoring') || n.id === 'notif-init-1') {
+                verificationPill = `
+                  <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #0284c7; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.28); border-radius: 9999px; padding: 3px 12px; font-size: 0.735rem; font-weight: 700; margin-top: 0.35rem; width: fit-content;">
+                    <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.7); display: inline-block;"></span>
+                    <span>Autonomous Attendance Sensor Active</span>
+                  </div>
+                `;
+              } else if (rawBody.includes('clash-free verified') || rawBody.includes('successfully covered')) {
+                verificationPill = `
+                  <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #059669; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 9999px; padding: 3px 12px; font-size: 0.735rem; font-weight: 700; margin-top: 0.35rem; width: fit-content;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: rgba(16, 185, 129, 0.22); border-radius: 50%; color: #059669; font-size: 0.65rem; font-weight: 800;">✓</span>
+                    <span>Schedule Re-aligned &amp; Clash-Free Verified</span>
+                  </div>
+                `;
+              } else if (n.type === 'substitution_assigned') {
+                verificationPill = `
+                  <div style="display: inline-flex; align-items: center; gap: 0.45rem; color: #7C3AED; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 9999px; padding: 3px 12px; font-size: 0.735rem; font-weight: 700; margin-top: 0.35rem; width: fit-content;">
+                    <span>⚡</span>
+                    <span>Substitute Duty Assigned &amp; Conflict-Free</span>
+                  </div>
+                `;
+              }
+
+              const createdDate = new Date(n.createdAt);
+              const timeStr = createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const dateStr = createdDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+              const isUnread = !n.readAt;
+              const unreadIndicator = isUnread ? `
+                <span style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; font-weight: 800; color: #0284c7; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.3); padding: 2px 8px; border-radius: 9999px; flex-shrink: 0;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: #0284c7; box-shadow: 0 0 6px rgba(2, 132, 199, 0.8); display: inline-block;"></span> NEW
+                </span>
+              ` : `
+                <span style="font-size: 0.7rem; color: #94A3B8; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; flex-shrink: 0;">
+                  <span style="color: #10B981; font-weight: 800;">✓</span> Read
+                </span>
+              `;
+
+              const cardBorderLeft = isUnread ? accentColor : '#94A3B8';
+              const cardBg = isUnread ? '#FFFFFF' : '#F8FAFC';
+              const cardBorder = isUnread ? 'rgba(6, 182, 212, 0.35)' : '#E2E8F0';
+              const cardShadow = isUnread ? '0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -2px rgba(15, 23, 42, 0.04)' : '0 1px 3px rgba(15, 23, 42, 0.02)';
+
+              item.style.cssText = `
+                border-radius: 18px !important;
+                display: flex;
+                flex-direction: column;
+                gap: 0.4rem;
+                padding: 1.1rem 1.25rem;
+                background: ${cardBg};
+                border: 1.5px solid ${cardBorder};
+                border-left: 4px solid ${cardBorderLeft} !important;
+                box-shadow: ${cardShadow};
+                cursor: pointer;
+                text-decoration: none;
+                position: relative;
+                transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, border-color 180ms ease;
+              `;
+
+              item.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                  <span class="badge ${badgeClass}" style="font-size: 0.68rem; padding: 2px 9px; font-weight: 800; letter-spacing: 0.03em;">${badgeText}</span>
+                  ${unreadIndicator}
+                </div>
+                <div style="font-size: 0.95rem; color: #0F172A; font-weight: 800; line-height: 1.35; margin-top: 0.15rem; letter-spacing: -0.01em;">
+                  ${displayTitle}
+                </div>
+                <div style="font-size: 0.835rem; color: #334155; line-height: 1.55; margin-top: 0.1rem; word-break: break-word;">
+                  ${richBody}
+                </div>
+                ${verificationPill}
+                <div style="font-size: 0.725rem; color: #64748B; margin-top: 0.45rem; display: flex; align-items: center; justify-content: space-between; font-weight: 500; border-top: 1px solid #F1F5F9; padding-top: 0.45rem;">
+                  <div style="display: flex; align-items: center; gap: 0.45rem;">
+                    <span>🕒 ${timeStr}</span>
+                    <span style="opacity: 0.35;">•</span>
+                    <span>📅 ${dateStr}</span>
+                  </div>
+                  <div style="color: #0284c7; font-size: 0.725rem; font-weight: 700; display: flex; align-items: center; gap: 0.25rem;">
+                    <span>View Details</span>
+                    <span class="notif-arrow" style="transition: transform 140ms ease;">→</span>
+                  </div>
+                </div>
+              `;
+
+              item.addEventListener('mouseenter', () => {
+                item.style.transform = 'translateY(-2px)';
+                item.style.boxShadow = '0 10px 25px -4px rgba(15, 23, 42, 0.1), 0 4px 10px -2px rgba(15, 23, 42, 0.05)';
+                item.style.borderColor = 'rgba(6, 182, 212, 0.6)';
+                const arrow = item.querySelector('.notif-arrow');
+                if (arrow) arrow.style.transform = 'translateX(3px)';
+              });
+              item.addEventListener('mouseleave', () => {
+                item.style.transform = 'translateY(0)';
+                item.style.boxShadow = cardShadow;
+                item.style.borderColor = cardBorder;
+                const arrow = item.querySelector('.notif-arrow');
+                if (arrow) arrow.style.transform = 'translateX(0)';
+              });
+
+              item.onclick = async () => {
+                await api.markNotificationRead(n.id);
+                item.style.background = '#F8FAFC';
+                item.style.borderColor = '#E2E8F0';
+                item.style.borderLeftColor = '#94A3B8';
+                updateNotifBadge();
+                if (n.type === 'substitution_assigned' || n.type === 'substitution_updated') {
+                  closeModal();
+                  showFullscreenReplacementPopup(n.data || n);
+                } else {
+                  closeModal();
+                  router.navigate('/timetable');
+                }
+              };
+
+              notifyContent.appendChild(item);
+            });
+          }
+
+          const markAllBtn = document.createElement('button');
+          markAllBtn.className = 'btn btn-secondary btn-sm';
+          markAllBtn.innerHTML = '✓ Mark All Read';
+          markAllBtn.style.cssText = 'border-radius: 9999px !important; font-size: 0.8rem; font-weight: 700; color: #334155; padding: 0.5rem 1.15rem; border: 1px solid #E2E8F0; background: #FFFFFF;';
+          markAllBtn.onclick = async () => {
+            await api.markAllNotificationsRead(user ? user.id : null);
+            showToast('All notifications marked as read', 'normal');
+            updateNotifBadge();
+            closeModal();
+          };
+
+          const viewTimetableBtn = document.createElement('button');
+          viewTimetableBtn.className = 'btn btn-cyan btn-sm';
+          viewTimetableBtn.innerHTML = '📅 View Timetable';
+          viewTimetableBtn.style.cssText = 'border-radius: 9999px !important; font-size: 0.82rem; font-weight: 800; padding: 0.5rem 1.35rem; box-shadow: 0 4px 14px -2px rgba(6, 182, 212, 0.45);';
+          viewTimetableBtn.onclick = () => {
+            closeModal();
+            router.navigate('/timetable');
+          };
+
+          const testBtn = document.createElement('button');
+          testBtn.className = 'btn btn-secondary btn-sm';
+          testBtn.innerHTML = '⚡ Simulate Alert';
+          testBtn.style.cssText = 'border-radius: 9999px !important; margin-right: auto; font-size: 0.78rem; font-weight: 700; color: #475569; padding: 0.5rem 1rem; border: 1px solid #E2E8F0; background: #F8FAFC;';
+          testBtn.onclick = () => {
+            triggerTestNotification();
+            showToast('Real-time system notification simulated!', 'info');
+          };
+
+          openModal(modalHeaderNode, notifyContent, [testBtn, markAllBtn, viewTimetableBtn]);
+        };
+      }
+
+      // Logout handler
+      document.getElementById('logout-btn').onclick = async () => {
+        await auth.logout();
+        router.navigate('/login');
+      };
+
+      // Topbar Quick Absence Trigger
+      document.getElementById('quick-absence-topbar').onclick = () => {
+        router.navigate('/leaves');
+      };
+
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.update();
+        }).catch(err => console.log('SW register error', err));
+      }
+
+      init3DTilt();
+      initSystemNotifications();
+      router.init();
+    }
+
+    init();
+  </script>
+</body>
+</html>

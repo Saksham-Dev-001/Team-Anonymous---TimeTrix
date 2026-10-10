@@ -1,0 +1,63 @@
+/* File: /css/base.css */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--bg-app); /* #F8FAFC */
+  color: var(--text-main); /* #0F172A */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(34, 211, 238, 0.06) 0px, transparent 40%),
+    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 45%);
+  background-attachment: fixed;
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+a {
+  color: var(--primary-accent-dark, #0891b2);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+a:hover {
+  color: var(--secondary-accent, #8b5cf6);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-accent, #22d3ee);
+  outline-offset: 3px;
+}
+
+/* Custom Scrollbar for Light Canvas (Cross-browser: Firefox + WebKit) */
+html, body, * {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-accent);
+}

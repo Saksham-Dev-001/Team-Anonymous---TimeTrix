@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline | TimeTrix — by Team Anonymous</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--bg-app);
+    }
+    .offline-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 1.5rem;
+      max-width: 440px;
+      box-shadow: var(--shadow-md);
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-card">
+    <h2 style="color: var(--primary-accent-dark); margin-bottom: 0.5rem; font-family: var(--font-brand);">Connection Interrupted</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.875rem;">
+      TimeTrix requires an internet connection to sync real-time timetable alterations. Please check your network and retry.
+    </p>
+    <div style="font-size: 0.75rem; color: #94A3B8; margin-bottom: 1.25rem;">Engineered by Team Anonymous</div>
+    <button class="btn btn-primary" onclick="window.location.reload()">Retry Connection</button>
+  </div>
+</body>
+</html>
+

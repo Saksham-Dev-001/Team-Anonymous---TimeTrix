@@ -1,0 +1,27 @@
+/* File: /css/themes.css */
+/* Projector / High-Contrast Accessibility Mode */
+
+body.projector-mode {
+  --bg-app: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --border-subtle: #94a3b8;
+  --text-main: #000000;
+  --text-muted: #334155;
+  font-size: 18px;
+}
+
+body.projector-mode .timetable-grid {
+  gap: 12px;
+}
+
+body.projector-mode .timetable-cell {
+  min-height: 110px;
+  border-width: 2px;
+  font-weight: 600;
+}
+
+body.projector-mode .session-code {
+  font-size: 1.1rem;
+}
+
